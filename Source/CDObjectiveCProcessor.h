@@ -21,6 +21,8 @@
 - (void)addClass:(CDOCClass *)aClass withAddress:(uint64_t)address;
 - (CDOCClass *)classWithAddress:(uint64_t)address;
 
+- (void)addClassReference:(CDOCClass *)aClass;
+
 - (void)addClassesFromArray:(NSArray *)array;
 - (void)addCategoriesFromArray:(NSArray *)array;
 
@@ -29,6 +31,7 @@
 - (void)process;
 - (void)loadProtocols;
 - (void)loadClasses;
+- (void)loadClassReferences;
 - (void)loadCategories;
 
 - (void)registerTypesWithObject:(CDTypeController *)typeController phase:(NSUInteger)phase;

@@ -23,12 +23,12 @@
 @implementation CDObjectiveCProcessor
 {
     CDMachOFile *_machOFile;
-    
+
     NSMutableArray *_classes;
     NSMutableDictionary *_classesByAddress;
-    
+    NSMutableArray *_classReferences;
     NSMutableArray *_categories;
-    
+
     CDProtocolUniquer *_protocolUniquer;
 }
 
@@ -38,8 +38,9 @@
         _machOFile = machOFile;
         _classes = [[NSMutableArray alloc] init];
         _classesByAddress = [[NSMutableDictionary alloc] init];
+        _classReferences = [[NSMutableArray alloc] init];
         _categories = [[NSMutableArray alloc] init];
-        
+
         _protocolUniquer = [[CDProtocolUniquer alloc] init];
     }
 
@@ -76,7 +77,7 @@
             return @"Unknown";
 
         CDMachOFileDataCursor *cursor = [[CDMachOFileDataCursor alloc] initWithSection:self.objcImageInfoSection];
-        
+
         [cursor readInt32];
         uint32_t v2 = [cursor readInt32];
         //NSLog(@"%s: %08x %08x", __cmd, v1, v2);
@@ -84,17 +85,17 @@
         // v2 == 2 -> Supported
         // v2 == 6 -> Required
         //NSParameterAssert(v2 == 0 || v2 == 2 || v2 == 6);
-        
+
         // See markgc.c in the objc4 project
         switch (v2 & 0x06) {
             case 0: return @"Unsupported";
             case 2: return @"Supported";
             case 6: return @"Required";
         }
-        
+
         return [NSString stringWithFormat:@"Unknown (0x%08x)", v2];
     }
-    
+
     return nil;
 }
 
@@ -104,6 +105,11 @@
 {
     [_classes addObject:aClass];
     [_classesByAddress setObject:aClass forKey:[NSNumber numberWithUnsignedLongLong:address]];
+}
+
+- (void)addClassReference:(CDOCClass *)aClass;
+{
+    [_classReferences addObject:aClass];
 }
 
 - (CDOCClass *)classWithAddress:(uint64_t)address;
@@ -142,6 +148,7 @@
 
         // Load classes before categories, so we can get a dictionary of classes by address.
         [self loadClasses];
+        [self loadClassReferences];
         [self loadCategories];
     }
 }
@@ -152,6 +159,11 @@
 }
 
 - (void)loadClasses;
+{
+    // Implement in subclasses.
+}
+
+- (void)loadClassReferences;
 {
     // Implement in subclasses.
 }
@@ -182,7 +194,7 @@
 
     [visitor willVisitObjectiveCProcessor:self];
     [visitor visitObjectiveCProcessor:self];
-    
+
     // TODO: Sort protocols by dependency
     // TODO: (2004-01-30) It looks like protocols might be defined in more than one file.  i.e. NSObject.
     // TODO: (2004-02-02) Looks like we need to record the order the protocols were encountered, or just always sort protocols
@@ -196,6 +208,9 @@
 
     for (id aClassOrCategory in classesAndCategories)
         [aClassOrCategory recursivelyVisit:visitor];
+
+    for (CDOCClass *aClass in _classReferences)
+        [visitor visitClassReference:aClass];
 
     [visitor didVisitObjectiveCProcessor:self];
 }

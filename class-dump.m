@@ -19,6 +19,7 @@
 #import "CDFatFile.h"
 #import "CDFatArch.h"
 #import "CDSearchPathState.h"
+#import "CDUnusedClassVisitor.h"
 
 void print_usage(void)
 {
@@ -45,7 +46,8 @@ void print_usage(void)
             "        --sdk-mac      specify Mac OS X version (will look for /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX<version>.sdk\n"
             "                       or /Developer/SDKs/MacOSX<version>.sdk)\n"
             "        --sdk-root     specify the full SDK root path (or use --sdk-ios/--sdk-mac for a shortcut)\n"
-            ,
+            "        --unused-classes list the classes that appear to be unused\n"
+           ,
             CLASS_DUMP_VERSION
        );
 }
@@ -57,12 +59,14 @@ void print_usage(void)
 #define CD_OPT_SDK_MAC     5
 #define CD_OPT_SDK_ROOT    6
 #define CD_OPT_HIDE        7
+#define CD_OPT_UNUSED_CLASSES        8
 
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
         NSString *searchString;
         BOOL shouldGenerateSeparateHeaders = NO;
+        BOOL shouldFindUnusedClasses = NO;
         BOOL shouldListArches = NO;
         BOOL shouldPrintVersion = NO;
         CDArch targetArch;
@@ -92,6 +96,7 @@ int main(int argc, char *argv[])
             { "sdk-mac",                 required_argument, NULL, CD_OPT_SDK_MAC },
             { "sdk-root",                required_argument, NULL, CD_OPT_SDK_ROOT },
             { "hide",                    required_argument, NULL, CD_OPT_HIDE },
+            { "unused-classes",          no_argument,       NULL, CD_OPT_UNUSED_CLASSES },
             { NULL,                      0,                 NULL, 0 },
         };
 
@@ -115,15 +120,15 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
-                    
+
                 case CD_OPT_LIST_ARCHES:
                     shouldListArches = YES;
                     break;
-                    
+
                 case CD_OPT_VERSION:
                     shouldPrintVersion = YES;
                     break;
-                    
+
                 case CD_OPT_SDK_IOS: {
                     NSString *root = [NSString stringWithUTF8String:optarg];
                     //NSLog(@"root: %@", root);
@@ -134,10 +139,10 @@ int main(int argc, char *argv[])
                         str = [NSString stringWithFormat:@"/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS%@.sdk", root];
                     }
                     classDump.sdkRoot = str;
-                    
+
                     break;
                 }
-                    
+
                 case CD_OPT_SDK_MAC: {
                     NSString *root = [NSString stringWithUTF8String:optarg];
                     //NSLog(@"root: %@", root);
@@ -148,18 +153,18 @@ int main(int argc, char *argv[])
                         str = [NSString stringWithFormat:@"/Developer/SDKs/MacOSX%@.sdk", root];
                     }
                     classDump.sdkRoot = str;
-                    
+
                     break;
                 }
-                    
+
                 case CD_OPT_SDK_ROOT: {
                     NSString *root = [NSString stringWithUTF8String:optarg];
                     //NSLog(@"root: %@", root);
                     classDump.sdkRoot = root;
-                    
+
                     break;
                 }
-                    
+
                 case CD_OPT_HIDE: {
                     NSString *str = [NSString stringWithUTF8String:optarg];
                     if ([str isEqualToString:@"all"]) {
@@ -170,15 +175,20 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
-                    
+
+                case CD_OPT_UNUSED_CLASSES: {
+                    shouldFindUnusedClasses = YES;
+                    break;
+                }
+
                 case 'a':
                     classDump.shouldShowIvarOffsets = YES;
                     break;
-                    
+
                 case 'A':
                     classDump.shouldShowMethodAddresses = YES;
                     break;
-                    
+
                 case 'C': {
                     NSError *error;
                     NSRegularExpression *regularExpression = [NSRegularExpression regularExpressionWithPattern:[NSString stringWithUTF8String:optarg]
@@ -194,40 +204,40 @@ int main(int argc, char *argv[])
                     // Last one wins now.
                     break;
                 }
-                    
+
                 case 'f': {
                     searchString = [NSString stringWithUTF8String:optarg];
                     break;
                 }
-                    
+
                 case 'H':
                     shouldGenerateSeparateHeaders = YES;
                     break;
-                    
+
                 case 'I':
                     classDump.shouldSortClassesByInheritance = YES;
                     break;
-                    
+
                 case 'o':
                     outputPath = [NSString stringWithUTF8String:optarg];
                     break;
-                    
+
                 case 'r':
                     classDump.shouldProcessRecursively = YES;
                     break;
-                    
+
                 case 's':
                     classDump.shouldSortClasses = YES;
                     break;
-                    
+
                 case 'S':
                     classDump.shouldSortMethods = YES;
                     break;
-                    
+
                 case 't':
                     classDump.shouldShowHeader = NO;
                     break;
-                    
+
                 case '?':
                 default:
                     errorFlag = YES;
@@ -275,7 +285,7 @@ int main(int argc, char *argv[])
                 CDFile *file = [CDFile fileWithContentsOfFile:executablePath searchPathState:classDump.searchPathState];
                 if (file == nil) {
                     NSFileManager *defaultManager = [NSFileManager defaultManager];
-                    
+
                     if ([defaultManager fileExistsAtPath:executablePath]) {
                         if ([defaultManager isReadableFileAtPath:executablePath]) {
                             fprintf(stderr, "class-dump: Input file (%s) is neither a Mach-O file nor a fat archive.\n", [executablePath UTF8String]);
@@ -309,11 +319,15 @@ int main(int argc, char *argv[])
                 } else {
                     [classDump processObjectiveCData];
                     [classDump registerTypes];
-                    
+
                     if (searchString != nil) {
                         CDFindMethodVisitor *visitor = [[CDFindMethodVisitor alloc] init];
                         visitor.classDump = classDump;
                         visitor.searchString = searchString;
+                        [classDump recursivelyVisit:visitor];
+                    } if (shouldFindUnusedClasses) {
+                        CDUnusedClassVisitor *visitor = [[CDUnusedClassVisitor alloc] init];
+                        visitor.classDump = classDump;
                         [classDump recursivelyVisit:visitor];
                     } else if (shouldGenerateSeparateHeaders) {
                         CDMultiFileVisitor *multiFileVisitor = [[CDMultiFileVisitor alloc] init];

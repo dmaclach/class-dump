@@ -45,6 +45,7 @@
 - (void)visitInstanceMethod:(CDOCMethod *)method propertyState:(CDVisitorPropertyState *)propertyState;
 - (void)visitIvar:(CDOCInstanceVariable *)ivar;
 - (void)visitProperty:(CDOCProperty *)property;
+- (void)visitClassReference:(CDOCClass *)aClass;
 
 - (void)visitRemainingProperties:(CDVisitorPropertyState *)propertyState;
 
