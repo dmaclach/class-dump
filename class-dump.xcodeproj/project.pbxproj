@@ -128,6 +128,7 @@
 		0D288C10187BC2EE0026E2A0 /* CDOCClassReference.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D288C0E187BC2EE0026E2A0 /* CDOCClassReference.h */; };
 		0D288C11187BC2EE0026E2A0 /* CDOCClassReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D288C0F187BC2EE0026E2A0 /* CDOCClassReference.m */; };
 		8B16C22B1D935D4D0011A974 /* CDUnusedClassVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B16C22A1D935D4D0011A974 /* CDUnusedClassVisitor.m */; };
+		8B72CA091F2B94020092E8A8 /* CDUnreferencedSelectorVisitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B72CA081F2B94020092E8A8 /* CDUnreferencedSelectorVisitor.m */; };
 		C270B5C616C54AD6006CA75D /* ULEB128.m in Sources */ = {isa = PBXBuildFile; fileRef = C270B5C516C54AD5006CA75D /* ULEB128.m */; };
 		C270B5C816C54B0C006CA75D /* ULEB128.h in Headers */ = {isa = PBXBuildFile; fileRef = C270B5C716C54B0A006CA75D /* ULEB128.h */; };
 		DA7533B213AA587A003BE32C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01EB826313A590D9003EDE60 /* Foundation.framework */; };
@@ -410,6 +411,8 @@
 		0D288C0F187BC2EE0026E2A0 /* CDOCClassReference.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDOCClassReference.m; path = Source/CDOCClassReference.m; sourceTree = "<group>"; };
 		8B16C2291D935D4D0011A974 /* CDUnusedClassVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDUnusedClassVisitor.h; path = Source/CDUnusedClassVisitor.h; sourceTree = "<group>"; };
 		8B16C22A1D935D4D0011A974 /* CDUnusedClassVisitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDUnusedClassVisitor.m; path = Source/CDUnusedClassVisitor.m; sourceTree = "<group>"; };
+		8B72CA071F2B93E40092E8A8 /* CDUnreferencedSelectorVisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CDUnreferencedSelectorVisitor.h; path = Source/CDUnreferencedSelectorVisitor.h; sourceTree = "<group>"; };
+		8B72CA081F2B94020092E8A8 /* CDUnreferencedSelectorVisitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = CDUnreferencedSelectorVisitor.m; path = Source/CDUnreferencedSelectorVisitor.m; sourceTree = "<group>"; };
 		C270B5C516C54AD5006CA75D /* ULEB128.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ULEB128.m; path = Source/ULEB128.m; sourceTree = "<group>"; };
 		C270B5C716C54B0A006CA75D /* ULEB128.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ULEB128.h; path = Source/ULEB128.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -543,6 +546,8 @@
 				01EB829C13A591D7003EDE60 /* CDClassDumpVisitor.m */,
 				01EB82A713A591D7003EDE60 /* CDFindMethodVisitor.h */,
 				01EB82A813A591D7003EDE60 /* CDFindMethodVisitor.m */,
+				8B72CA071F2B93E40092E8A8 /* CDUnreferencedSelectorVisitor.h */,
+				8B72CA081F2B94020092E8A8 /* CDUnreferencedSelectorVisitor.m */,
 				8B16C2291D935D4D0011A974 /* CDUnusedClassVisitor.h */,
 				8B16C22A1D935D4D0011A974 /* CDUnusedClassVisitor.m */,
 				01EB831D13A591D8003EDE60 /* CDVisitor.h */,
@@ -1077,6 +1082,7 @@
 				01B02D2113A5B4D70047BC53 /* CDStructureTable.m in Sources */,
 				01B02D2213A5B4D70047BC53 /* CDTypeController.m in Sources */,
 				01B02D2313A5B4D70047BC53 /* CDStructureInfo.m in Sources */,
+				8B72CA091F2B94020092E8A8 /* CDUnreferencedSelectorVisitor.m in Sources */,
 				8B16C22B1D935D4D0011A974 /* CDUnusedClassVisitor.m in Sources */,
 				01B02D2513A5B4D70047BC53 /* CDClassDumpVisitor.m in Sources */,
 				01B02D2613A5B4D70047BC53 /* CDFindMethodVisitor.m in Sources */,
@@ -1400,7 +1406,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application: David MacLachlan (SS58M32G2C)";
+				CODE_SIGN_IDENTITY = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "class-dump-Prefix.pch";
 				LLVM_LTO = NO;
@@ -1416,7 +1422,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_IDENTITY = "Developer ID Application: David MacLachlan (SS58M32G2C)";
+				CODE_SIGN_IDENTITY = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "class-dump-Prefix.pch";
 				LLVM_LTO = YES_THIN;

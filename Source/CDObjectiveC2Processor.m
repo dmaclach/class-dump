@@ -73,6 +73,20 @@
     }
 }
 
+- (void)loadSelReferences;
+{
+    CDSection *section = [[self.machOFile dataConstSegment] sectionWithName:@"__objc_selrefs"];
+    
+    CDMachOFileDataCursor *cursor = [[CDMachOFileDataCursor alloc] initWithSection:section];
+    while ([cursor isAtEnd] == NO) {
+        uint64_t val = [cursor readPtr];
+        NSString *selector = [self.machOFile stringAtAddress:val];
+        if (selector != nil) {
+            [self addSelReference:selector];
+        }
+    }
+}
+
 - (void)loadCategories;
 {
     CDSection *section = [[self.machOFile dataConstSegment] sectionWithName:@"__objc_catlist"];

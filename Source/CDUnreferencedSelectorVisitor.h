@@ -5,6 +5,6 @@
 
 #import "CDVisitor.h"
 
-@interface CDUnusedClassVisitor : CDVisitor
+@interface CDUnreferencedSelectorVisitor : CDVisitor
 
 @end

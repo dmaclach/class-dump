@@ -133,6 +133,10 @@
 {
 }
 
+- (void)visitSelectorReference:(NSString *)aSelector;
+{
+}
+
 - (void)visitRemainingProperties:(CDVisitorPropertyState *)propertyState;
 {
 }

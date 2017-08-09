@@ -20,6 +20,7 @@
 #import "CDFatArch.h"
 #import "CDSearchPathState.h"
 #import "CDUnusedClassVisitor.h"
+#import "CDUnreferencedSelectorVisitor.h"
 
 void print_usage(void)
 {
@@ -47,6 +48,7 @@ void print_usage(void)
             "                       or /Developer/SDKs/MacOSX<version>.sdk)\n"
             "        --sdk-root     specify the full SDK root path (or use --sdk-ios/--sdk-mac for a shortcut)\n"
             "        --unused-classes list the classes that appear to be unused\n"
+            "        --unreferenced-selectors list selectors that aren't directly referenced\n"
            ,
             CLASS_DUMP_VERSION
        );
@@ -60,6 +62,7 @@ void print_usage(void)
 #define CD_OPT_SDK_ROOT    6
 #define CD_OPT_HIDE        7
 #define CD_OPT_UNUSED_CLASSES        8
+#define CD_OPT_UNREFERENCED_SELECTORS        9
 
 int main(int argc, char *argv[])
 {
@@ -67,6 +70,7 @@ int main(int argc, char *argv[])
         NSString *searchString;
         BOOL shouldGenerateSeparateHeaders = NO;
         BOOL shouldFindUnusedClasses = NO;
+        BOOL shouldFindUnreferencedSelectors = NO;
         BOOL shouldListArches = NO;
         BOOL shouldPrintVersion = NO;
         CDArch targetArch;
@@ -97,6 +101,7 @@ int main(int argc, char *argv[])
             { "sdk-root",                required_argument, NULL, CD_OPT_SDK_ROOT },
             { "hide",                    required_argument, NULL, CD_OPT_HIDE },
             { "unused-classes",          no_argument,       NULL, CD_OPT_UNUSED_CLASSES },
+            { "unreferenced-selectors",  no_argument,       NULL, CD_OPT_UNREFERENCED_SELECTORS },
             { NULL,                      0,                 NULL, 0 },
         };
 
@@ -178,6 +183,11 @@ int main(int argc, char *argv[])
 
                 case CD_OPT_UNUSED_CLASSES: {
                     shouldFindUnusedClasses = YES;
+                    break;
+                }
+
+                case CD_OPT_UNREFERENCED_SELECTORS: {
+                    shouldFindUnreferencedSelectors = YES;
                     break;
                 }
 
@@ -325,22 +335,32 @@ int main(int argc, char *argv[])
                         visitor.classDump = classDump;
                         visitor.searchString = searchString;
                         [classDump recursivelyVisit:visitor];
-                    } if (shouldFindUnusedClasses) {
-                        CDUnusedClassVisitor *visitor = [[CDUnusedClassVisitor alloc] init];
-                        visitor.classDump = classDump;
-                        [classDump recursivelyVisit:visitor];
-                    } else if (shouldGenerateSeparateHeaders) {
-                        CDMultiFileVisitor *multiFileVisitor = [[CDMultiFileVisitor alloc] init];
-                        multiFileVisitor.classDump = classDump;
-                        classDump.typeController.delegate = multiFileVisitor;
-                        multiFileVisitor.outputPath = outputPath;
-                        [classDump recursivelyVisit:multiFileVisitor];
+                    }
+                    if (shouldFindUnusedClasses || shouldFindUnreferencedSelectors) {
+                        if (shouldFindUnusedClasses) {
+                            CDUnusedClassVisitor *visitor = [[CDUnusedClassVisitor alloc] init];
+                            visitor.classDump = classDump;
+                            [classDump recursivelyVisit:visitor];
+                        }
+                        if (shouldFindUnreferencedSelectors) {
+                            CDUnreferencedSelectorVisitor *visitor = [[CDUnreferencedSelectorVisitor alloc] init];
+                            visitor.classDump = classDump;
+                            [classDump recursivelyVisit:visitor];
+                        }
                     } else {
-                        CDClassDumpVisitor *visitor = [[CDClassDumpVisitor alloc] init];
-                        visitor.classDump = classDump;
-                        if ([hiddenSections containsObject:@"structures"]) visitor.shouldShowStructureSection = NO;
-                        if ([hiddenSections containsObject:@"protocols"])  visitor.shouldShowProtocolSection  = NO;
-                        [classDump recursivelyVisit:visitor];
+                        if (shouldGenerateSeparateHeaders) {
+                            CDMultiFileVisitor *multiFileVisitor = [[CDMultiFileVisitor alloc] init];
+                            multiFileVisitor.classDump = classDump;
+                            classDump.typeController.delegate = multiFileVisitor;
+                            multiFileVisitor.outputPath = outputPath;
+                            [classDump recursivelyVisit:multiFileVisitor];
+                        } else {
+                            CDClassDumpVisitor *visitor = [[CDClassDumpVisitor alloc] init];
+                            visitor.classDump = classDump;
+                            if ([hiddenSections containsObject:@"structures"]) visitor.shouldShowStructureSection = NO;
+                            if ([hiddenSections containsObject:@"protocols"])  visitor.shouldShowProtocolSection  = NO;
+                            [classDump recursivelyVisit:visitor];
+                        }
                     }
                 }
             }

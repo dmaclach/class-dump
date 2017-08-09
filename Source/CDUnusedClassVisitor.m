@@ -1,7 +1,7 @@
 // -*- mode: ObjC -*-
 
 //  This file is part of class-dump, a utility for examining the Objective-C segment of Mach-O files.
-//  Copyright (C) 1997-1998, 2000-2001, 2004-2013 Steve Nygard.
+//  Copyright (C) 2017 Google Inc.
 
 #import "CDUnusedClassVisitor.h"
 
@@ -38,8 +38,9 @@
     NSUInteger classesDefined = [_classes count];
     [_classes removeObjectsInArray:allReferencedClasses.allObjects];
     [_classes sortUsingSelector:@selector(compare:)];
-    NSString *separatedClasses = [_classes componentsJoinedByString:@", "];
-    NSString *result = [[NSString alloc] initWithFormat:@"Classes Defined: %zd\nUnreferenced classes: %zd\n%@\n",
+    NSString *separatedClasses = [_classes componentsJoinedByString:@"\n"];
+    NSString *result = [[NSString alloc] initWithFormat:
+                        @"# Classes Defined: %zd\n# Unreferenced classes: %zd\n%@\n\n",
                         classesDefined, [_classes count], separatedClasses];
     NSData *data = [result dataUsingEncoding:NSUTF8StringEncoding];
     [(NSFileHandle *)[NSFileHandle fileHandleWithStandardOutput] writeData:data];

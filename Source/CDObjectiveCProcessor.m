@@ -28,7 +28,8 @@
     NSMutableDictionary *_classesByAddress;
     NSMutableArray *_classReferences;
     NSMutableArray *_categories;
-
+    NSMutableSet *_selReferences;
+    
     CDProtocolUniquer *_protocolUniquer;
 }
 
@@ -39,6 +40,7 @@
         _classes = [[NSMutableArray alloc] init];
         _classesByAddress = [[NSMutableDictionary alloc] init];
         _classReferences = [[NSMutableArray alloc] init];
+        _selReferences = [[NSMutableSet alloc] init];
         _categories = [[NSMutableArray alloc] init];
 
         _protocolUniquer = [[CDProtocolUniquer alloc] init];
@@ -112,6 +114,11 @@
     [_classReferences addObject:aClass];
 }
 
+- (void)addSelReference:(NSString *)aSel;
+{
+    [_selReferences addObject:aSel];
+}
+
 - (CDOCClass *)classWithAddress:(uint64_t)address;
 {
     return [_classesByAddress objectForKey:[NSNumber numberWithUnsignedLongLong:address]];
@@ -150,6 +157,7 @@
         [self loadClasses];
         [self loadClassReferences];
         [self loadCategories];
+        [self loadSelReferences];
     }
 }
 
@@ -172,6 +180,12 @@
 {
     // Implement in subclasses.
 }
+
+- (void)loadSelReferences;
+{
+    // Implement in subclasses.
+}
+
 
 
 - (void)registerTypesWithObject:(CDTypeController *)typeController phase:(NSUInteger)phase;
@@ -212,6 +226,10 @@
     for (CDOCClass *aClass in _classReferences)
         [visitor visitClassReference:aClass];
 
+    for (NSString *aSelector in _selReferences) {
+        [visitor visitSelectorReference:aSelector];
+    }
+    
     [visitor didVisitObjectiveCProcessor:self];
 }
 

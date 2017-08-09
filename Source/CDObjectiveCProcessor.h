@@ -28,10 +28,13 @@
 
 - (void)addCategory:(CDOCCategory *)category;
 
+- (void)addSelReference:(NSString *)aSel;
+
 - (void)process;
 - (void)loadProtocols;
 - (void)loadClasses;
 - (void)loadClassReferences;
+- (void)loadSelReferences;
 - (void)loadCategories;
 
 - (void)registerTypesWithObject:(CDTypeController *)typeController phase:(NSUInteger)phase;

@@ -46,6 +46,7 @@
 - (void)visitIvar:(CDOCInstanceVariable *)ivar;
 - (void)visitProperty:(CDOCProperty *)property;
 - (void)visitClassReference:(CDOCClass *)aClass;
+- (void)visitSelectorReference:(NSString *)aSelector;
 
 - (void)visitRemainingProperties:(CDVisitorPropertyState *)propertyState;
 
