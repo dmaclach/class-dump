@@ -20,7 +20,7 @@
         _shouldShowStructureSection = YES;
         _shouldShowProtocolSection  = YES;
     }
-    
+
     return self;
 }
 
@@ -126,6 +126,14 @@
 }
 
 - (void)visitProperty:(CDOCProperty *)property;
+{
+}
+
+- (void)visitClassReference:(CDOCClass *)aClass;
+{
+}
+
+- (void)visitSelectorReference:(NSString *)aSelector;
 {
 }
 
