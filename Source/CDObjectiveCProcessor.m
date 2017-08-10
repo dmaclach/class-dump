@@ -29,7 +29,7 @@
     NSMutableArray *_classReferences;
     NSMutableArray *_categories;
     NSMutableSet *_selReferences;
-
+  
     CDProtocolUniquer *_protocolUniquer;
 }
 

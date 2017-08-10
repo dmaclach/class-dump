@@ -76,7 +76,7 @@
 - (void)loadSelReferences;
 {
     CDSection *section = [[self.machOFile dataConstSegment] sectionWithName:@"__objc_selrefs"];
-
+    
     CDMachOFileDataCursor *cursor = [[CDMachOFileDataCursor alloc] initWithSection:section];
     while ([cursor isAtEnd] == NO) {
         uint64_t val = [cursor readPtr];
